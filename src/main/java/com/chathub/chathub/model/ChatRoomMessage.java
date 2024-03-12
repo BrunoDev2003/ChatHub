@@ -1,17 +1,14 @@
 package com.chathub.chathub.model;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-
+@Getter
+@Setter
 public class ChatRoomMessage {
-    private String from;
-    private int date;
-    private String message;
+    private String user;
+    private String type;
+    private String data;
     private String roomId;
 
 
