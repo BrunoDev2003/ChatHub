@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChathubApplication {
 
-
     public static void main(String[] args) {
 	/*String port = System.getenv("PORT");
 	if (port == null) {
@@ -19,5 +18,4 @@ public class ChathubApplication {
         //app.run(args);
         SpringApplication.run(ChathubApplication.class, args);
     }
-
 }
