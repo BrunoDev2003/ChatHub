@@ -1,10 +1,7 @@
-package com.chathub.chathub.service;
+package com.chathub.chathub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-
 @SpringBootApplication
 public class ChathubApplication {
 

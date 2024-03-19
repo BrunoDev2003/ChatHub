@@ -3,7 +3,6 @@ package com.chathub.chathub.repository;
 import com.chathub.chathub.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
 import java.util.logging.Logger;
 
 public class UsersRepository {
