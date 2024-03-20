@@ -17,8 +17,16 @@ public class UsersRepository {
     private StringRedisTemplate redisTemplate;
 
     public User getUserById(int id) {
-        String username = redisTemplate.opsForHash().get(String.format(USERNAME_KEY, id), USERNAME_HASH_KEY);
+        /*String username = redisTemplate.opsForHash().get(String.format(USERNAME_KEY, id), USERNAME_HASH_KEY);
         boolean isOnline = Boolean.parseBoolean(redisTemplate.opsForHash().get(String.format(USERNAME_KEY, id), IS_ONLINE_HASH_KEY));
-        return new User(id, username, isOnline);
+        return new User(id, username, isOnline);*/
+        String usernameKey = String.format(USERNAME_KEY, id);
+        String username = (String) redisTemplate.opsForHash().get(usernameKey, USERNAME_HASH_KEY);
+        if(username == null) {
+            LOGGER.warning("User not found");
+            return null;
+        }
+        boolean isOnline = Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(IS_ONLINE_HASH_KEY, String.valueOf(id)));
+        return null;
     }
 }
