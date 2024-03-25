@@ -25,5 +25,14 @@ public class RoomsRepository {
         return roomIds;
     }
 
+    public boolean roomExists(String roomId) {
+        return redisTemplate.hasKey(String.format(ROOMS_KEY, roomId));
+    }
+
+    public String getRoomNameById(String roomId) {
+        String roomName = String.format(ROOMS_NAME_KEY, roomId);
+        return redisTemplate.opsForValue().get(roomName);
+    }
+
 
 }
