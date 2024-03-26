@@ -1,5 +1,7 @@
 package com.chathub.chathub.repository;
 
+import com.chathub.chathub.model.Message;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,24 @@ public class RoomsRepository {
     public String getRoomNameById(String roomId) {
         String roomName = String.format(ROOMS_NAME_KEY, roomId);
         return redisTemplate.opsForValue().get(roomName);
+    }
+
+    public Set<String> getMessages(String roomId, int offset, int size) {
+        String roomKey = String.format(ROOMS_KEY, roomId);
+        Set<String> messages = redisTemplate.opsForZSet().reverseRange(roomKey, offset, offset + size);
+        LOGGER.debug(String.format("Mensagens recebidas da roomId:%s:, offset:%s, size:%s ", roomId, offset, size));
+        return messages;
+    }
+
+    public void sendMessageToDatabase(String text, String serializedMessage) {
+        LOGGER.debug(String.format("Salvando mensagem no banco de dados: topico:%s, mensagem:%s ", text, serializedMessage));
+        redisTemplate.convertAndSend(text, serializedMessage);
+    }
+
+    public void saveMessage(Message message) {
+        Gson gson = new Gson();
+        String roomKey = String.format(ROOMS_KEY, message.getRoomId());
+        redisTemplate.opsForZSet().add(roomKey, gson.toJson(message), message.getDate());
     }
 
 
