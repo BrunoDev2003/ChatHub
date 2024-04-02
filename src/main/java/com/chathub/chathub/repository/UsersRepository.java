@@ -69,11 +69,11 @@ public class UsersRepository {
         return Integer.parseInt(userKey.split(":")[1]);
     }
 
-    public void AddUserToOnlineList(String id) {
+    public void addUserToOnlineList(String id) {
         redisTemplate.opsForSet().add(IS_ONLINE_HASH_KEY, id);
     }
 
-    public void reomveUserFromOnlineList(String id) {
+    public void removeUserFromOnlineList(String id) {
         redisTemplate.opsForSet().remove(IS_ONLINE_HASH_KEY, id);
     }
 }
