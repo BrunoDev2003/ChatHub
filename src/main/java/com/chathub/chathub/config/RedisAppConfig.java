@@ -34,14 +34,14 @@ public class RedisAppConfig {
     }
 
     @Bean
-    RedisMessageListenerContainer redisContainer(RedisConnectionFactory redisConnectionFactory, MessageListenerAdapter messageListener)
+    RedisMessageListenerContainer redisContainer(RedisConnectionFactory redisConnectionFactory,
+                                                 MessageListenerAdapter messageListener) {
 
-    RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(
-
-    messageListener(),topic());
+        container.addMessageListener(messageListener(), topic());
         return container;
+    }
 
 
     @Bean
