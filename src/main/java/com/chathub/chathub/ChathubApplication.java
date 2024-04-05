@@ -2,6 +2,9 @@ package com.chathub.chathub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+
 @SpringBootApplication
 public class ChathubApplication {
 
@@ -13,6 +16,14 @@ public class ChathubApplication {
         //SpringApplication app = new SpringApplication(ChathubApplication.class);
         //app.setDefaultProperties(Collections.singletonMap("server.port", port));
         //app.run(args);
+        // SpringApplication.run(ChathubApplication.class, args);
         SpringApplication.run(ChathubApplication.class, args);
+
+
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void hello() {
+        System.out.println("Hello, world!");
     }
 }
