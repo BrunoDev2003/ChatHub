@@ -3,12 +3,14 @@ package com.chathub.chathub.repository;
 import com.chathub.chathub.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+@Service
 public class UsersRepository {
     private static final Logger LOGGER = Logger.getLogger(UsersRepository.class.getName());
 

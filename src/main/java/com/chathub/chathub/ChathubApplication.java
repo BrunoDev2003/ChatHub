@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.chathub.chathub")
 public class ChathubApplication {
 
     public static void main(String[] args) {
