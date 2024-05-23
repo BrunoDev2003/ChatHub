@@ -7,14 +7,14 @@ public enum MessageType {
     USER_CONNECTED("user_connected"),
     USER_DISCONNECTED("user_disconnected");
 
-    private final String type;
+    private final String value;
 
     MessageType(String type) {
-        this.type = type;
+        this.value = type;
     }
 
     @JsonValue
-    public String type() {
-        return this.type;
+    public String value() {
+        return this.value;
     }
 }
