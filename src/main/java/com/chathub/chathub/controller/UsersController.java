@@ -66,7 +66,7 @@ public class UsersController {
         String user = (String) session.getAttribute(SessionAttrs.USER_ATTR_NAME);
         if (user == null) {
             LOGGER.debug("Usuario não encontrado na sessão pelo atributo desejado." + SessionAttrs.USER_ATTR_NAME);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Gson gson = new Gson();
         return new ResponseEntity<>(gson.fromJson(user, User.class), HttpStatus.OK);

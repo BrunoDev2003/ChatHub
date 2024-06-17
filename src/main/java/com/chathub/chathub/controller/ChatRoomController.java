@@ -58,17 +58,16 @@ public class ChatRoomController {
                 emitter.send(event);
             } catch (IOException e) {
                 // Isso ocorre quando o cliente é desconectado
-                LOGGER.error("Error sending message", e);
+                LOGGER.error("Erro ao mandarr mensagem", e);
                 return 1;
             }
             return 0;
         };
 
-        // RedisMessageSubscriber is a global class which subscribes to the "MESSAGES" channel
-        // However once the /stream endpoint is invoked, it's necessary to notify the global subscriber
-        // that such client-server subscription exists.
-        //
-        // We send the callback to the subscriber with the SSE instance for sending server-side events.
+        // RedisMessageSubscriber é uma classe global que realiza um subscribe no canal de "MESSAGES"
+        // quando o /stream é invocado, é necessário notificar o subscriber global
+        // que tal inscrição de cliente-servidor existe.
+        // retornamos o callback para o subscriber com a instância SSE para mandar eventos server-side.
 
         MessageSubscriber messageSubscriber = (MessageSubscriber) messageListener.getDelegate();
         messageSubscriber.attach(handler);
@@ -122,14 +121,13 @@ public class ChatRoomController {
 
     private String handleRegularMessageCase(ChatRoomMessage message) {
         Gson gson = new Gson();
-        // We've received a message from user. It's necessary to deserialize it first.
+        // após receber a mensagem do usuario, deserializa a mensagem
         Message chatmessage = gson.fromJson(message.getData(), Message.class);
-        // Add the user who sent the message to online list.
+        // adiciona o usuario que enviou a mensagem na lista de usuarios online
         usersRepository.addUserToOnlineList(chatmessage.getFrom());
-        //redisTemplate.opsForSet().add(ONLINE_USERS_KEY, message.getFrom());
-        // Write the message to DB.
+        // salva a mensagem no BD
         roomsRepository.saveMessage(chatmessage);
-        // Finally create the serialized output which would go to pub/sub
+        // serializa a mensagem para ser enviada por pub/sub
         return gson.toJson(new PubSubMessage<>(message.getType().value(), message));
     }
 
