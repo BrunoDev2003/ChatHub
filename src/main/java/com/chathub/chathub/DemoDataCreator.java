@@ -11,6 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.chathub.chathub.model.User;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -41,17 +43,15 @@ public class DemoDataCreator {
             LOGGER.info("Inicializando demo data...\n");
             // este contador é usado para o roomId
             redisTemplate.opsForValue().set("total_users", "0");
-            // Some rooms have pre-defined names. When the clients attempts to fetch a room, an additional lookup
-            // is handled to resolve the name.
-            // Rooms with private messages don't have a name
+            // Rooms com mensagens privadas não tem nome
             redisTemplate.opsForValue().set("room:0:name", "General");
-
 
             List<User> users = new LinkedList<>();
             // For each name create a user.
+            // Para cada nome cria um usuario com o for each
             for (String username : DEMO_USERNAME_LIST) {
                 User user = createUser(username);
-                // This one should go to the session
+                // usuario entra na seção/session
                 users.add(user);
             }
 
@@ -88,6 +88,9 @@ public class DemoDataCreator {
     private void addMessage(String roomId, String fromId, String content, Integer timeStamp) {
         Gson gson = new Gson();
         String roomKey = String.format("room:%s", roomId);
+
+        LocalDateTime dateTime = LocalDateTime.ofEpochSecond(timeStamp, 0, java.time.ZoneOffset.UTC);
+        String formattedDate = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         Message message = new Message(
                 fromId,
                 timeStamp,
@@ -101,7 +104,7 @@ public class DemoDataCreator {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String usernameKey = String.format("username:%s", username);
 
-        // Yeah, bcrypt generally ins't used in .NET, this one is mainly added to be compatible with Node and Python demo servers.
+        // Usando o bcrypt para a senha.
         String hashedPassword = encoder.encode(DEMO_PASSWORD);
 
         Integer nextId = redisTemplate.opsForValue().increment("total_users").intValue();

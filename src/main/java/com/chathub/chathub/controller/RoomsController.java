@@ -50,7 +50,7 @@ public class RoomsController {
             if (roomExists) {
                 String name = roomsRepository.getRoomNameById(roomId);
                 if (name == null) {
-                    // private chat case
+                    // se for nulo trata como um chat privado
                     Room privateRoom = handlePrivateRoomCase(roomId);
                     if (privateRoom == null) {
                         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -68,8 +68,8 @@ public class RoomsController {
     private String[] parseUserIds(String roomId) {
         String[] userIds = roomId.split(":");
         if (userIds.length != 2) {
-            LOGGER.error("User ids not parsed properly");
-            throw new RuntimeException("Unable to parse users ids from roomId: " + roomId);
+            LOGGER.error("IDs de usuário não foi parseado corretamente");
+            throw new RuntimeException("Não foi possivel parsear ids de usuarios pelo roomId: " + roomId);
         }
         return userIds;
     }
