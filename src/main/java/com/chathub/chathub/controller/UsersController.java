@@ -42,7 +42,8 @@ public class UsersController {
 
         for (Integer id : ids) {
             User user = usersRepository.getUserById(id);
-            if (user != null) {
+            if (user == null) {
+                LOGGER.debug("Usuário não encontrado pelo id: " + id);
                 return new ResponseEntity<>(new HashMap<>(), HttpStatus.BAD_REQUEST);
             }
             usersMap.put(String.valueOf(user.getId()), user);
