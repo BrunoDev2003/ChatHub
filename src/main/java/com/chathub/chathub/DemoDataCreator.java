@@ -31,7 +31,7 @@ public class DemoDataCreator {
     }
 
     private static final String DEMO_PASSWORD = "senha123";
-    private static final List<String> DEMO_USERNAME_LIST = Arrays.asList("Pablo", "Joe", "Mary", "Alex");
+    private static final List<String> DEMO_USERNAME_LIST = Arrays.asList("Bruno", "Ricardo", "Mariana", "Alex");
     private static final List<String> DEMO_GREETING_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
     private static final List<String> DEMO_MESSAGES_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
 
@@ -47,7 +47,6 @@ public class DemoDataCreator {
             redisTemplate.opsForValue().set("room:0:name", "General");
 
             List<User> users = new LinkedList<>();
-            // For each name create a user.
             // Para cada nome cria um usuario com o for each
             for (String username : DEMO_USERNAME_LIST) {
                 User user = createUser(username);

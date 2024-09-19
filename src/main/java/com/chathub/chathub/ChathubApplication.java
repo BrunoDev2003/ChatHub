@@ -13,7 +13,7 @@ public class ChathubApplication {
     public static void main(String[] args) {
         String port = System.getenv("PORT");
         if (port == null) {
-            port = "6379";
+            port = "8080";
         }
         SpringApplication app = new SpringApplication(ChathubApplication.class);
         app.setDefaultProperties(Collections.singletonMap("server.port", port));
