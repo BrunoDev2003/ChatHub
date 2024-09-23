@@ -58,7 +58,7 @@ public class ChatRoomController {
                 emitter.send(event);
             } catch (IOException e) {
                 // Isso ocorre quando o cliente é desconectado
-                LOGGER.error("Erro ao mandarr mensagem", e);
+                LOGGER.error("Erro ao mandar mensagem", e);
                 return 1;
             }
             return 0;
