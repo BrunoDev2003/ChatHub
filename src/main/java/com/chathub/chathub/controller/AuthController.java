@@ -39,7 +39,7 @@ public class AuthController {
 
         User user = usersRepository.getUserByName(username);
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         user.setOnline(true);
 
