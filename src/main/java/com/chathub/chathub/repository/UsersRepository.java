@@ -50,7 +50,7 @@ public class UsersRepository {
     }
 
     public boolean userExists(String username) {
-        return redisTemplate.hasKey(String.format(USERNAME_HASH_KEY, username));
+        return redisTemplate.hasKey(String.format(USERNAME_KEY, username));
     }
 
     public User getUserByName(String username) {
@@ -58,7 +58,7 @@ public class UsersRepository {
             LOGGER.warning("User not found");
             return null;
         }
-        String userKey = redisTemplate.opsForValue().get(String.format(USERNAME_HASH_KEY, username));
+        String userKey = redisTemplate.opsForValue().get(String.format(USERNAME_KEY, username));
         int id = parseUserId(Objects.requireNonNull(userKey));
         boolean isOnline = redisTemplate.opsForSet().isMember(IS_ONLINE_HASH_KEY, String.valueOf(id));
 
@@ -68,7 +68,7 @@ public class UsersRepository {
 
     private int parseUserId(String userKey) {
         String[] userIds = userKey.split(":");
-        return Integer.parseInt(userKey.split(":")[1]);
+        return Integer.parseInt(userIds[1]);
     }
 
     public void addUserToOnlineList(String id) {
