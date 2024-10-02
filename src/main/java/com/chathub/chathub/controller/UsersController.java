@@ -3,6 +3,7 @@ package com.chathub.chathub.controller;
 import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
+import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +32,9 @@ public class UsersController {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * O request que o cliente faz para verificar se o usuário existe no cache.
@@ -95,6 +100,17 @@ public class UsersController {
         }
 
         return new ResponseEntity<>(usersMap, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/updateStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updateUserStatus(@RequestParam("userId") String userId, @RequestParam("isOnline") boolean isOnline) {
+        try{
+            userService.updateUserStatus(userId, isOnline);
+            return new ResponseEntity<>("Status do usuário atualizado com sucesso.", HttpStatus.OK);
+        } catch (Exception e) {
+            LOGGER.error("Erro ao atualizar o status do usuário.", e);
+            return new ResponseEntity<>("Erro ao atualizar o status do usuário.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 

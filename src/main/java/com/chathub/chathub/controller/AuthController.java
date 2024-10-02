@@ -4,6 +4,7 @@ import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.LoginData;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
+import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private UserService userService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
@@ -55,6 +59,8 @@ public class AuthController {
         }
         user.setOnline(true);
 
+        userService.updateUserStatus(String.valueOf(user.getId()), true);
+
         Gson gson = new Gson();
         session.setAttribute(SessionAttrs.USER_ATTR_NAME, gson.toJson(user));
         LOGGER.info("Logar usuario: " + user.getUsername());
@@ -74,8 +80,15 @@ public class AuthController {
      */
     @PostMapping(value = "/logout")
     public ResponseEntity<Object> logout(Model model, HttpSession session) {
-        Object user = session.getAttribute(SessionAttrs.USER_ATTR_NAME);
+        Object userObj = session.getAttribute(SessionAttrs.USER_ATTR_NAME);
+        if (userObj == null) {
+            LOGGER.info("Usuario não encontrado na sessão.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = new Gson().fromJson(userObj.toString(), User.class);
         LOGGER.info("Deslogar usuario: " + user.toString());
+
+        userService.updateUserStatus(String.valueOf(user.getId()), false);
 
         session.removeAttribute(SessionAttrs.USER_ATTR_NAME);
         return ResponseEntity.status(HttpStatus.OK).build();
