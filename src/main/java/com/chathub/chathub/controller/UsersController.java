@@ -3,6 +3,7 @@ package com.chathub.chathub.controller;
 import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
+import com.chathub.chathub.service.MessageSubscriber;
 import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
@@ -13,15 +14,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,10 +39,36 @@ public class UsersController {
     @Autowired
     private UserService userService;
 
+    private Jedis jedis = new Jedis("localhost", 6379);
+    private BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
+
+    public UsersController() {
+        new Thread(() -> jedis.subscribe(new JedisPubSub() {
+            @Override
+            public void onMessage(String channel, String message) {
+                LOGGER.info("Mensagem recebida no global subscriber: " + message + "No canal: " + channel);
+                if ("user-status".equals(channel)) {
+                    messageQueue.offer(message);
+                }
+                /*super.onMessage(channel, message);*/
+            }
+
+            @Override
+            public void onSubscribe(String channel, int subscribedChannels) {
+                LOGGER.info("Subscrito ao canal: " + channel);
+            }
+
+            @Override
+            public void onUnsubscribe(String channel, int subscribedChannels) {
+                LOGGER.info("Desinscrito do canal: " + channel);
+            }
+        }, "user-status")).start();
+    }
+
     /**
      * O request que o cliente faz para verificar se o usuário existe no cache.
      */
-    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, User>> get(@RequestParam(value = "ids") String idsString) {
         Set<Integer> ids = parseIds(idsString);
 
@@ -67,7 +96,7 @@ public class UsersController {
      * O request que o cliente faz para verificar se o usuário existe no cache.
      */
 
-    @RequestMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getMe(Model model, HttpSession session) {
         String user = (String) session.getAttribute(SessionAttrs.USER_ATTR_NAME);
         if (user == null) {
@@ -82,7 +111,7 @@ public class UsersController {
      * Valida qual usuarios estão online
      */
 
-    @RequestMapping(value = "/online", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/online", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, User>> getOnlineUsers() {
         Map<String, User> usersMap = new HashMap<>();
         Set<Integer> onlineUsersIds = usersRepository.getOnlineUsersIds();
@@ -102,14 +131,29 @@ public class UsersController {
         return new ResponseEntity<>(usersMap, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/updateStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateUserStatus(@RequestParam("userId") String userId, @RequestParam("isOnline") boolean isOnline) {
-        try{
+        try {
             userService.updateUserStatus(userId, isOnline);
             return new ResponseEntity<>("Status do usuário atualizado com sucesso.", HttpStatus.OK);
         } catch (Exception e) {
             LOGGER.error("Erro ao atualizar o status do usuário.", e);
             return new ResponseEntity<>("Erro ao atualizar o status do usuário.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/status-updates")
+    public ResponseEntity<String> getStatusUpdates() {
+        try {
+            String message = messageQueue.poll(5, TimeUnit.SECONDS);
+            if (message == null) {
+                return new ResponseEntity<>("Nenhuma atualização de status disponível.", HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new ResponseEntity<>("Erro ao obter atualizações de status.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
