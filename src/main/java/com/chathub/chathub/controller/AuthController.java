@@ -79,20 +79,27 @@ public class AuthController {
      * Desligar a sessão do usuário.
      */
     @PostMapping(value = "/logout")
-    public ResponseEntity<Object> logout(Model model, HttpSession session) {
-        Object userObj = session.getAttribute(SessionAttrs.USER_ATTR_NAME);
-        if (userObj == null) {
-            LOGGER.info("Usuario não encontrado na sessão.");
+    public ResponseEntity<Object> logout(Model model, HttpServletRequest request) {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null) {
+            Object userObj = existingSession.getAttribute(SessionAttrs.USER_ATTR_NAME);
+            if (userObj != null) {
+                User user = new Gson().fromJson(userObj.toString(), User.class);
+                LOGGER.info("Deslogar usuario: " + user.toString());
+
+                userService.updateUserStatus(String.valueOf(user.getId()), false);
+
+                existingSession.removeAttribute(SessionAttrs.USER_ATTR_NAME);
+                existingSession.invalidate();
+                return ResponseEntity.status(HttpStatus.OK).build();
+            } else {
+                LOGGER.info("Atributo de usuário não encontrado na sessão.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User attribute not found in session.");
+            }
+        } else {
+            LOGGER.info("Sessão não encontrada.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        User user = new Gson().fromJson(userObj.toString(), User.class);
-        LOGGER.info("Deslogar usuario: " + user.toString());
-
-        userService.updateUserStatus(String.valueOf(user.getId()), false);
-
-        session.removeAttribute(SessionAttrs.USER_ATTR_NAME);
-        return ResponseEntity.status(HttpStatus.OK).build();
-
     }
 
     // Health check endpoint
