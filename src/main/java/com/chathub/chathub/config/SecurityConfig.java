@@ -1,5 +1,6 @@
 package com.chathub.chathub.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,13 +36,19 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
                 .logout(logout -> logout
-                        .permitAll()
+                        .logoutUrl("/api/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
                 );
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout
+//                        .permitAll()
+//                );
         return http.build();
     }
 }
