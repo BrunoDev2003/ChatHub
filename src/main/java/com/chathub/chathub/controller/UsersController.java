@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +60,12 @@ public class UsersController {
                 LOGGER.info("Desinscrito do canal: " + channel);
             }
         }, "user-status")).start();
+    }
+
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = usersRepository.findAll();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     /**

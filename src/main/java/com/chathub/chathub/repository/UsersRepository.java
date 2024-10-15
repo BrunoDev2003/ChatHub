@@ -2,15 +2,19 @@ package com.chathub.chathub.repository;
 
 import com.chathub.chathub.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@Service
+@Repository
 public class UsersRepository {
     private static final Logger LOGGER = Logger.getLogger(UsersRepository.class.getName());
 
@@ -21,6 +25,9 @@ public class UsersRepository {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisTemplate<String, User> redisUserTemplate;
 
     public User getUserById(int id) {
 
@@ -77,5 +84,17 @@ public class UsersRepository {
 
     public void removeUserFromOnlineList(String id) {
         redisTemplate.opsForSet().remove(IS_ONLINE_HASH_KEY, id);
+    }
+
+    public List<User> findAll() {
+        Set<String> keys = redisUserTemplate.keys("user:*");
+        List<User> users = new ArrayList<>();
+        for (String key : keys) {
+            User user = redisUserTemplate.opsForValue().get(key);
+            if (user != null) {
+                users.add(user);
+            }
+        }
+        return users;
     }
 }
