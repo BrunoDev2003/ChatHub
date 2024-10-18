@@ -5,6 +5,7 @@ import com.chathub.chathub.repository.RoomsRepository;
 import com.chathub.chathub.repository.UsersRepository;
 import com.chathub.chathub.service.MessageSubscriber;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.internal.Function;
@@ -19,10 +20,12 @@ import org.springframework.stereotype.Controller;
 import org.slf4j.Logger;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Controller
@@ -51,6 +54,7 @@ public class ChatRoomController {
         SseEmitter emitter = new SseEmitter();
 
         Function<String, Integer> handler = (String message) -> {
+            LOGGER.debug("Mensagem recebida: " + message);
             SseEmitter.SseEventBuilder event = SseEmitter.event()
                     .data(message);
 
@@ -97,7 +101,20 @@ public class ChatRoomController {
      * Recebe mensagens do cliente...
      */
 
-    @RequestMapping(value = "/emit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/emit", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ChatRoomMessage>> getMessages() {
+        //Coletar mensagens do repo ou DB
+        List<ChatRoomMessage> messages = roomsRepository.getAllMessages();
+        LOGGER.debug("Mensagens recebidas: " + messages.toString());
+
+        if (messages.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } else {
+            return ResponseEntity.ok(messages);
+        }
+    }
+
+    @RequestMapping(value = "/emit", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> get(@RequestBody ChatRoomMessage message) {
         Gson gson = new Gson();
         String serializedMessage;
@@ -113,6 +130,8 @@ public class ChatRoomController {
             serializedMessage = gson.toJson(new PubSubMessage<>(message.getType().value(), message.getData()));
         }
 
+        LOGGER.debug("Mensagem serializada: " + serializedMessage);
+
         // Envia o serializedJson para o banco de dados Redis
         roomsRepository.sendMessageToDatabase(topic.getTopic(), serializedMessage);
 
@@ -121,28 +140,42 @@ public class ChatRoomController {
 
     private String handleRegularMessageCase(ChatRoomMessage message) {
         Gson gson = new Gson();
+        LOGGER.info("Handling regular message case..." + message.getData());
         // após receber a mensagem do usuario, deserializa a mensagem
+        LOGGER.debug("Deserializando mensagem..." + message.getData());
         Message chatmessage = gson.fromJson(message.getData(), Message.class);
         // adiciona o usuario que enviou a mensagem na lista de usuarios online
         usersRepository.addUserToOnlineList(chatmessage.getFrom());
         // salva a mensagem no BD
         roomsRepository.saveMessage(chatmessage);
         // serializa a mensagem para ser enviada por pub/sub
-        return gson.toJson(new PubSubMessage<>(message.getType().value(), message));
+        String serializedMessage = gson.toJson(new PubSubMessage<>(message.getType().value(), message));
+        LOGGER.debug("Mensagem serializada para Pub/Sub: " + serializedMessage);
+        return serializedMessage;
     }
 
     private String handleUserConnectionCase(ChatRoomMessage message) {
         Gson gson = new Gson();
         int userId = message.getUser().getId();
         String messageType = message.getType().value();
-        User serializedUser = gson.fromJson(message.getData(), User.class);
-        String serializedMessage = gson.toJson(new PubSubMessage<>(messageType, serializedUser));
-        if (message.getType() == MessageType.USER_CONNECTED) {
-            usersRepository.addUserToOnlineList(String.valueOf(userId));
-        } else {
-            usersRepository.removeUserFromOnlineList(String.valueOf(userId));
+        LOGGER.info("Handling user connection case..." + message.toString());
+
+        try {
+            User serializedUser = gson.fromJson(message.getData(), User.class);
+            LOGGER.debug("Serializando usuario..." + serializedUser.toString());
+            String serializedMessage = gson.toJson(new PubSubMessage<>(messageType, serializedUser));
+            LOGGER.debug("Mensagem serializada para Pub/Sub: " + serializedMessage);
+            if (message.getType() == MessageType.USER_CONNECTED) {
+                usersRepository.addUserToOnlineList(String.valueOf(userId));
+            } else {
+                usersRepository.removeUserFromOnlineList(String.valueOf(userId));
+            }
+            return serializedMessage;
+
+        } catch (JsonSyntaxException e) {
+            LOGGER.error("Erro ao deserializar usuario" + message.getData(), e);
+            throw e;
         }
-        return serializedMessage;
     }
 
 }
