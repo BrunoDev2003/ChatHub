@@ -7,11 +7,11 @@ import lombok.Setter;
 @Setter
 public class Message {
     private String from;
-    private int date;
+    private long date;
     private String text;
     private String roomId;
 
-    public Message(String from, int date, String text, String roomId) {
+    public Message(String from, long date, String text, String roomId) {
         this.from = from;
         this.date = date;
         this.text = text;
