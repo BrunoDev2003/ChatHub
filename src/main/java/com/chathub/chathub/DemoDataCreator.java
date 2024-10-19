@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.DataType;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,17 +23,18 @@ import java.util.stream.Collectors;
 public class DemoDataCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoDataCreator.class);
-
     private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, User> redisUserTemplate;
 
     @Autowired
-    public DemoDataCreator(StringRedisTemplate redisTemplate) {
+    public DemoDataCreator(StringRedisTemplate redisTemplate, RedisTemplate<String, User> redisUserTemplate) {
         this.redisTemplate = redisTemplate;
+        this.redisUserTemplate = redisUserTemplate;
         this.createDemoData();
     }
 
     private static final String DEMO_PASSWORD = "senha123";
-    private static final List<String> DEMO_USERNAME_LIST = Arrays.asList("Bruno", "Ricardo", "Mariana", "Alex");
+    private static final List<String> DEMO_USERNAME_LIST = Arrays.asList("Joe", "Bruno", "Mariana", "Alex");
     private static final List<String> DEMO_GREETING_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
     private static final List<String> DEMO_MESSAGES_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
 
@@ -80,16 +83,13 @@ public class DemoDataCreator {
         return DEMO_GREETING_LIST.get((int) Math.floor(Math.random() * DEMO_GREETING_LIST.size()));
     }
 
-    private int getTimestamp(){
+    private int getTimestamp() {
         return Long.valueOf((System.currentTimeMillis() / 1000L)).intValue();
     }
 
     private void addMessage(String roomId, String fromId, String content, Integer timeStamp) {
         Gson gson = new Gson();
         String roomKey = String.format("room:%s", roomId);
-
-        LocalDateTime dateTime = LocalDateTime.ofEpochSecond(timeStamp, 0, java.time.ZoneOffset.UTC);
-        String formattedDate = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         Message message = new Message(
                 fromId,
                 timeStamp,
@@ -100,15 +100,77 @@ public class DemoDataCreator {
     }
 
     private User createUser(String username) {
+
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String usernameKey = String.format("username:%s", username);
-
-        // Usando o bcrypt para a senha.
         String hashedPassword = encoder.encode(DEMO_PASSWORD);
-
         Integer nextId = redisTemplate.opsForValue().increment("total_users").intValue();
         String userKey = String.format("user:%s", nextId);
+        String usernameKey = String.format("username:%s", username);
 
+        // Ensure existing keys are handled correctly
+        if (redisTemplate.hasKey(userKey)) {
+            DataType type = redisTemplate.type(userKey);
+            LOGGER.warn("Key {} exists with type: {}", userKey, type);
+            if (!type.equals(DataType.STRING)) {
+                LOGGER.error("Key type mismatch for {}. Expected STRING, found: {}", userKey, type);
+                redisTemplate.delete(userKey); // Delete if it's not the expected type
+            }
+        }
+
+        // Store user object correctly as a JSON string
+        Gson gson = new Gson();
+        String userJson = gson.toJson(new User(nextId, username, false));
+        redisTemplate.opsForValue().set(userKey, userJson);
+        LOGGER.info("Stored user object as JSON in redisTemplate with key: {}", userKey);
+
+       /* // Check if the key exists and its type
+        if (redisTemplate.hasKey(userKey)) {
+            DataType type = redisTemplate.type(userKey);
+            LOGGER.warn("Key {} exists with type: {}", userKey, type);
+            if (!type.equals(DataType.HASH)) {
+                LOGGER.error("Key type mismatch for {}. Expected HASH, found: {}", userKey, type);
+                redisTemplate.delete(userKey); // Delete if it's not the expected type
+            }
+        }*/
+
+        /*// Check if the key exists and its type
+        if (redisTemplate.hasKey(userKey)) {
+            DataType type = redisTemplate.type(userKey);
+            LOGGER.warn("Key {} exists with type: {}", userKey, type);
+            if (!type.equals(DataType.HASH)) {
+                LOGGER.error("Key type mismatch for {}. Expected HASH, found: {}", userKey, type);
+                redisTemplate.delete(userKey); // Delete if it's not the expected type
+            }
+        }*/
+
+        // Store username and password as separate keys
+        redisTemplate.opsForValue().set(usernameKey, userKey);
+        redisTemplate.opsForHash().put(String.format("user:%s:details", nextId), "username", username);
+        redisTemplate.opsForHash().put(String.format("user:%s:details", nextId), "password", hashedPassword);
+        LOGGER.info("Stored username and password in redisTemplate for key: user:{}:details", nextId);
+
+       /* // Use redisTemplate for storing additional user details
+        redisTemplate.opsForValue().set(usernameKey, userKey);
+        LOGGER.info("Mapped username to user key in redisTemplate: {} -> {}", usernameKey, userKey);
+        redisTemplate.opsForHash().put(userKey, "username", username);
+        redisTemplate.opsForHash().put(userKey, "password", hashedPassword);
+        LOGGER.info("Stored username and password in redisTemplate for key: {}", userKey);*/
+
+        // add user to room set
+        String roomsKey = String.format("user:%s:rooms", nextId);
+        redisTemplate.opsForSet().add(roomsKey, "0");
+        LOGGER.info("Added user to room set with key: {}", roomsKey);
+
+        return new User(nextId, username, false);
+    }
+        /*BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        // Usando o bcrypt para a senha.
+        String hashedPassword = encoder.encode(DEMO_PASSWORD);
+        Integer nextId = redisTemplate.opsForValue().increment("total_users").intValue();
+        String userKey = String.format("user:%s", nextId);
+        String usernameKey = String.format("username:%s", username);
+
+        redisUserTemplate.opsForValue().set(userKey, new User(nextId, username, false));
         redisTemplate.opsForValue().set(usernameKey, userKey);
         redisTemplate.opsForHash().put(userKey, "username", username);
         redisTemplate.opsForHash().put(userKey, "password", hashedPassword);
@@ -121,7 +183,7 @@ public class DemoDataCreator {
                 username,
                 false
         );
-    }
+    }*/
 
     private String getPrivateRoomId(Integer userId1, Integer userId2) {
         Integer minUserId = userId1 > userId2 ? userId2 : userId1;
@@ -137,6 +199,22 @@ public class DemoDataCreator {
         String userRoomkey1 = String.format("user:%d:rooms", user1);
         String userRoomkey2 = String.format("user:%d:rooms", user2);
 
+        // Ensure old keys are properly cleaned
+        if (redisTemplate.hasKey(userRoomkey1)) {
+            DataType type = redisTemplate.type(userRoomkey1);
+            if (!type.equals(DataType.SET)) {
+                LOGGER.error("Key type mismatch for {}. Expected SET, found: {}", userRoomkey1, type);
+                redisTemplate.delete(userRoomkey1);
+            }
+        }
+        if (redisTemplate.hasKey(userRoomkey2)) {
+            DataType type = redisTemplate.type(userRoomkey2);
+            if (!type.equals(DataType.SET)) {
+                LOGGER.error("Key type mismatch for {}. Expected SET, found: {}", userRoomkey2, type);
+                redisTemplate.delete(userRoomkey2);
+            }
+        }
+
         redisTemplate.opsForSet().add(userRoomkey1, roomId);
         redisTemplate.opsForSet().add(userRoomkey2, roomId);
 
@@ -145,8 +223,8 @@ public class DemoDataCreator {
 
         return new Room(
                 roomId,
-                (String) redisTemplate.opsForHash().get(key1, "username"),
-                (String) redisTemplate.opsForHash().get(key2, "username")
+                (String) redisTemplate.opsForHash().get(String.format("user:%d:details", user1), "username"),
+                (String) redisTemplate.opsForHash().get(String.format("user%d:details", user2), "username")
         );
     }
 

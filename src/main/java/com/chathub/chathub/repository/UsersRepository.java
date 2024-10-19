@@ -1,6 +1,7 @@
 package com.chathub.chathub.repository;
 
 import com.chathub.chathub.model.User;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -87,12 +88,24 @@ public class UsersRepository {
     }
 
     public List<User> findAll() {
-        Set<String> keys = redisUserTemplate.keys("user:*");
+        Set<String> keys = redisTemplate.keys("user:*");
+        LOGGER.warning("Found keys: {}" + keys);
+
         List<User> users = new ArrayList<>();
+        Gson gson = new Gson();
         for (String key : keys) {
-            User user = redisUserTemplate.opsForValue().get(key);
-            if (user != null) {
-                users.add(user);
+            try {
+                LOGGER.warning("Fetching value for key: {}" + key);
+                String userJson = redisTemplate.opsForValue().get(key);
+                User user = gson.fromJson(userJson, User.class);
+                if (user != null) {
+                    users.add(user);
+                    LOGGER.warning("Added user: {}" + user);
+                } else {
+                    LOGGER.warning("No user found for key: " + key);
+                }
+            } catch (Exception e) {
+                LOGGER.severe("Error fetching user for key: " + key);
             }
         }
         return users;
