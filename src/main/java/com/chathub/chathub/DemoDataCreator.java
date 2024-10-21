@@ -107,83 +107,35 @@ public class DemoDataCreator {
         String userKey = String.format("user:%s", nextId);
         String usernameKey = String.format("username:%s", username);
 
-        // Ensure existing keys are handled correctly
+        // Chaves existentes são tratadas de forma correta;
         if (redisTemplate.hasKey(userKey)) {
             DataType type = redisTemplate.type(userKey);
             LOGGER.warn("Key {} exists with type: {}", userKey, type);
             if (!type.equals(DataType.STRING)) {
                 LOGGER.error("Key type mismatch for {}. Expected STRING, found: {}", userKey, type);
-                redisTemplate.delete(userKey); // Delete if it's not the expected type
+                redisTemplate.delete(userKey); // Delete se a chave existir com um tipo diferente do que o sistema requer;
             }
         }
 
-        // Store user object correctly as a JSON string
+        // Salvar User Object corretamente em formato de uma String JSON;
         Gson gson = new Gson();
         String userJson = gson.toJson(new User(nextId, username, false));
         redisTemplate.opsForValue().set(userKey, userJson);
         LOGGER.info("Stored user object as JSON in redisTemplate with key: {}", userKey);
 
-       /* // Check if the key exists and its type
-        if (redisTemplate.hasKey(userKey)) {
-            DataType type = redisTemplate.type(userKey);
-            LOGGER.warn("Key {} exists with type: {}", userKey, type);
-            if (!type.equals(DataType.HASH)) {
-                LOGGER.error("Key type mismatch for {}. Expected HASH, found: {}", userKey, type);
-                redisTemplate.delete(userKey); // Delete if it's not the expected type
-            }
-        }*/
-
-        /*// Check if the key exists and its type
-        if (redisTemplate.hasKey(userKey)) {
-            DataType type = redisTemplate.type(userKey);
-            LOGGER.warn("Key {} exists with type: {}", userKey, type);
-            if (!type.equals(DataType.HASH)) {
-                LOGGER.error("Key type mismatch for {}. Expected HASH, found: {}", userKey, type);
-                redisTemplate.delete(userKey); // Delete if it's not the expected type
-            }
-        }*/
-
-        // Store username and password as separate keys
+        // Salvar nome de usuario e senha como chaves separadas para evitar conflitos de tipos de chaves;
         redisTemplate.opsForValue().set(usernameKey, userKey);
         redisTemplate.opsForHash().put(String.format("user:%s:details", nextId), "username", username);
         redisTemplate.opsForHash().put(String.format("user:%s:details", nextId), "password", hashedPassword);
         LOGGER.info("Stored username and password in redisTemplate for key: user:{}:details", nextId);
 
-       /* // Use redisTemplate for storing additional user details
-        redisTemplate.opsForValue().set(usernameKey, userKey);
-        LOGGER.info("Mapped username to user key in redisTemplate: {} -> {}", usernameKey, userKey);
-        redisTemplate.opsForHash().put(userKey, "username", username);
-        redisTemplate.opsForHash().put(userKey, "password", hashedPassword);
-        LOGGER.info("Stored username and password in redisTemplate for key: {}", userKey);*/
-
-        // add user to room set
+        // adicionar usuario a um set de rooms
         String roomsKey = String.format("user:%s:rooms", nextId);
         redisTemplate.opsForSet().add(roomsKey, "0");
         LOGGER.info("Added user to room set with key: {}", roomsKey);
 
         return new User(nextId, username, false);
     }
-        /*BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        // Usando o bcrypt para a senha.
-        String hashedPassword = encoder.encode(DEMO_PASSWORD);
-        Integer nextId = redisTemplate.opsForValue().increment("total_users").intValue();
-        String userKey = String.format("user:%s", nextId);
-        String usernameKey = String.format("username:%s", username);
-
-        redisUserTemplate.opsForValue().set(userKey, new User(nextId, username, false));
-        redisTemplate.opsForValue().set(usernameKey, userKey);
-        redisTemplate.opsForHash().put(userKey, "username", username);
-        redisTemplate.opsForHash().put(userKey, "password", hashedPassword);
-
-        String roomsKey = String.format("user:%s:rooms", nextId);
-        redisTemplate.opsForSet().add(roomsKey, "0");
-
-        return new User(
-                nextId,
-                username,
-                false
-        );
-    }*/
 
     private String getPrivateRoomId(Integer userId1, Integer userId2) {
         Integer minUserId = userId1 > userId2 ? userId2 : userId1;
@@ -199,7 +151,7 @@ public class DemoDataCreator {
         String userRoomkey1 = String.format("user:%d:rooms", user1);
         String userRoomkey2 = String.format("user:%d:rooms", user2);
 
-        // Ensure old keys are properly cleaned
+        // Deletar chaves antigas com tipo imcompativel para evitar conflitos
         if (redisTemplate.hasKey(userRoomkey1)) {
             DataType type = redisTemplate.type(userRoomkey1);
             if (!type.equals(DataType.SET)) {
