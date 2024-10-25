@@ -117,10 +117,12 @@ public class DemoDataCreator {
             }
         }
 
-        // Salvar User Object corretamente em formato de uma String JSON;
+        // Salvar User Object corretamente em formato de uma String JSON usando a propriedade @class;
         Gson gson = new Gson();
-        String userJson = gson.toJson(new User(nextId, username, false));
-        redisTemplate.opsForValue().set(userKey, userJson);
+        User user = new User(nextId, username, false);
+//        String userJson = gson.toJson(new User(nextId, username, false));
+//        String userJson = gson.toJson(user);
+        redisUserTemplate.opsForValue().set(userKey, user);
         LOGGER.info("Stored user object as JSON in redisTemplate with key: {}", userKey);
 
         // Salvar nome de usuario e senha como chaves separadas para evitar conflitos de tipos de chaves;
@@ -134,7 +136,7 @@ public class DemoDataCreator {
         redisTemplate.opsForSet().add(roomsKey, "0");
         LOGGER.info("Added user to room set with key: {}", roomsKey);
 
-        return new User(nextId, username, false);
+        return user;
     }
 
     private String getPrivateRoomId(Integer userId1, Integer userId2) {
@@ -142,8 +144,6 @@ public class DemoDataCreator {
         Integer maxUserId = userId1 > userId2 ? userId1 : userId2;
         return String.format("%d:%d", minUserId, maxUserId);
     }
-
-    ;
 
     private Room createPrivateRoom(Integer user1, Integer user2) {
         String roomId = getPrivateRoomId(user1, user2);

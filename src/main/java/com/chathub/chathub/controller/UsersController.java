@@ -9,7 +9,9 @@ import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,9 @@ public class UsersController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RedisTemplate<String, User> redisUserTemplate;
 
     private Jedis jedis = new Jedis("localhost", 6379);
     private BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
@@ -64,8 +69,25 @@ public class UsersController {
 
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = usersRepository.findAll();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        Set<String> keys = redisUserTemplate.keys("user:*");
+        List<User> users = new ArrayList<>();
+        for (String key : keys) {
+            if (key.endsWith(":details") || key.endsWith(":rooms")) {
+                continue; //pular chaves que não são de usuários;
+            }
+            try {
+                User user = redisUserTemplate.opsForValue().get(key);
+                if (user != null) {
+                    users.add(user);
+                    LOGGER.info("Usuário encontrado e adicionado ao array de users : " + user);
+                } else {
+                    LOGGER.warn("Usuário não encontrado pela chave: " + key);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Erro ao buscar usuário pela chave: {} {}", e, key);
+            }
+        }
+        return ResponseEntity.ok(users);
     }
 
     /**
