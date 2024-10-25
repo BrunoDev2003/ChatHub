@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,6 +65,16 @@ public class RoomsRepository {
         Gson gson = new Gson();
         String roomKey = String.format(ROOMS_KEY, message.getRoomId());
         redisTemplate.opsForZSet().add(roomKey, gson.toJson(message), message.getDate());
+    }
+
+    public List getMessagesByUserId(int userId) {
+        Set<String> roomIds = getUserRoomIds(userId);
+        List<ChatRoomMessage> userMessages = new ArrayList<>();
+        for (String roomId : roomIds) {
+            Set<String> messages = getMessages(roomId, 0, -1);
+            messages.forEach(json -> userMessages.add(new Gson().fromJson(json, ChatRoomMessage.class)));
+        }
+        return userMessages;
     }
 
 

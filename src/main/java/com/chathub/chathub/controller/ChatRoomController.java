@@ -18,10 +18,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.slf4j.Logger;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -177,5 +174,12 @@ public class ChatRoomController {
             throw e;
         }
     }
+
+    @GetMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Message>> getUserMessages(@RequestParam("userId") int userId) {
+        List<Message> userMessages = roomsRepository.getMessagesByUserId(userId);
+        return ResponseEntity.ok(userMessages);
+    }
+
 
 }
