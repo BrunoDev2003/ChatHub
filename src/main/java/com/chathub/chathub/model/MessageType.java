@@ -1,5 +1,6 @@
 package com.chathub.chathub.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MessageType {
@@ -16,5 +17,15 @@ public enum MessageType {
     @JsonValue
     public String value() {
         return this.value;
+    }
+
+    @JsonCreator
+    public static MessageType forValue(String value) {
+        for (MessageType type : values()) {
+            if (type.value.equals(value)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown enum type " + value);
     }
 }

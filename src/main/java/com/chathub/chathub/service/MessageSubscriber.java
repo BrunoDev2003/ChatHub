@@ -33,4 +33,10 @@ public class MessageSubscriber implements MessageListener {
     public void detach(Function<String, Integer> handler) {
         handlers.remove(handler);
     }
+
+    public void handleMessage(String message) {
+        for (Function<String, Integer> handler : handlers) {
+            handler.apply(message);
+        }
+    }
 }

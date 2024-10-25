@@ -115,7 +115,7 @@ public class ChatRoomController {
     }
 
     @RequestMapping(value = "/emit", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> get(@RequestBody ChatRoomMessage message) {
+    public ResponseEntity<Object> postMessages(@RequestBody ChatRoomMessage message) {
         Gson gson = new Gson();
         String serializedMessage;
 
