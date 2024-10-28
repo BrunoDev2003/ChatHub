@@ -13,8 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.chathub.chathub.model.User;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -72,7 +70,7 @@ public class DemoDataCreator {
             }
 
             for (int messageIndex = 0; messageIndex < DEMO_MESSAGES_LIST.size(); messageIndex++) {
-                int messageDate = getTimestamp() - ((DEMO_MESSAGES_LIST.size() - messageIndex) * 200);
+                long messageDate = getTimestamp() - ((DEMO_MESSAGES_LIST.size() - messageIndex) * 200000); //subtrair por 200000 milisegundos (200 segundos);
                 addMessage("0", getRandomUserId(users), DEMO_MESSAGES_LIST.get(messageIndex), messageDate);
 
             }
@@ -83,11 +81,11 @@ public class DemoDataCreator {
         return DEMO_GREETING_LIST.get((int) Math.floor(Math.random() * DEMO_GREETING_LIST.size()));
     }
 
-    private int getTimestamp() {
-        return Long.valueOf((System.currentTimeMillis() / 1000L)).intValue();
+    private long getTimestamp() {
+        return System.currentTimeMillis(); // retorna o tempo atual em milisegundos;
     }
 
-    private void addMessage(String roomId, String fromId, String content, Integer timeStamp) {
+    private void addMessage(String roomId, String fromId, String content, long timeStamp) {
         Gson gson = new Gson();
         String roomKey = String.format("room:%s", roomId);
         Message message = new Message(
@@ -180,8 +178,8 @@ public class DemoDataCreator {
         );
     }
 
-    private int generateMessageDate() {
-        return (int) (getTimestamp() - Math.random() * 222);
+    private long generateMessageDate() {
+        return getTimestamp() - (long) (Math.random() * 222000); // Subtrair por 222000 milisegundos (222 segundos);
     }
 
     private String getRandomUserId(List<User> users) {
