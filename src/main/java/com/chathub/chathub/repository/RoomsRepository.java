@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +49,18 @@ public class RoomsRepository {
         LOGGER.debug(String.format("Mensagens recebidas da roomId:%s:, offset:%s, size:%s ", roomId, offset, size));
         return redisTemplate.opsForZSet().reverseRange(roomKey, offset, offset + size);
     }
+
+    public List<Message> getMessagesByRoomId(String roomId) {
+        String roomKey = String.format(ROOMS_KEY, roomId);
+        LOGGER.info("Getting messages for roomKey: {}", roomKey);
+        Set<String> messages = redisTemplate.opsForZSet().reverseRange(roomKey, 0, -1);
+        if (messages == null || messages.isEmpty()) {
+            LOGGER.warn("No messages found for roomId: {}", roomId);
+            return Collections.emptyList();
+        }
+        return messages.stream().map(json -> new Gson().fromJson(json, Message.class)).collect(Collectors.toList());
+    }
+
 
     public List<ChatRoomMessage> getAllMessages() {
         // Assuming you store messages with a known key pattern

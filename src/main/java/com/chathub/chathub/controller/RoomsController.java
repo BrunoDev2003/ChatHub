@@ -1,5 +1,6 @@
 package com.chathub.chathub.controller;
 
+import com.chathub.chathub.model.ChatRoomMessage;
 import com.chathub.chathub.model.Message;
 import com.chathub.chathub.model.Room;
 import com.chathub.chathub.model.User;
@@ -84,20 +85,23 @@ public class RoomsController {
         }
         return new Room(roomId, userId1.getUsername(), userId2.getUsername());
     }
+
     /**
      * Pegar mensagens.
      */
     @GetMapping(value = "messages/{roomId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Message>> getMessages(@PathVariable String roomId, @RequestParam int offset, @RequestParam int size) {
-        boolean roomExists = roomsRepository.roomExists(roomId);
-        List<Message> messages = new ArrayList<>();
-        if (roomExists) {
-            Set<String> values = roomsRepository.getMessages(roomId, offset, size);
-            for (String value : values) {
-                messages.add(deserialize(value));
-            }
-        }
-        return new ResponseEntity<>(messages, HttpStatus.OK);
+    public ResponseEntity<List<Message>> getMessages(@PathVariable String roomId) {
+        List<Message> messages = roomsRepository.getMessagesByRoomId(roomId);
+        return ResponseEntity.ok(messages);
+//        boolean roomExists = roomsRepository.roomExists(roomId);
+//        List<Message> messages = new ArrayList<>();
+//        if (roomExists) {
+//            Set<String> values = roomsRepository.getMessages(roomId, offset, size);
+//            for (String value : values) {
+//                messages.add(deserialize(value));
+//            }
+//        }
+//        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
     private Message deserialize(String value) {
@@ -108,6 +112,12 @@ public class RoomsController {
             LOGGER.error(String.format("Não foi possivel deserializar json: %s", value), e);
         }
         return null;
+    }
+
+    @GetMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Message>> getRoomMessages(@RequestParam("roomId") String roomId) {
+        List<Message> messages = roomsRepository.getMessagesByRoomId(roomId);
+        return ResponseEntity.ok(messages);
     }
 
 }
