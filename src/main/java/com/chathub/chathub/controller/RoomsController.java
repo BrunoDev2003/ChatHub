@@ -87,7 +87,7 @@ public class RoomsController {
     }
 
     /**
-     * Pegar mensagens.
+     * Pegar mensagens de dois usuarios de uma sala de chat especifica pelo ID desta sala.
      */
     @GetMapping(value = "messages/{roomId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Message>> getMessages(@PathVariable String roomId) {
@@ -112,12 +112,6 @@ public class RoomsController {
             LOGGER.error(String.format("Não foi possivel deserializar json: %s", value), e);
         }
         return null;
-    }
-
-    @GetMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Message>> getRoomMessages(@RequestParam("roomId") String roomId) {
-        List<Message> messages = roomsRepository.getMessagesByRoomId(roomId);
-        return ResponseEntity.ok(messages);
     }
 
 }
