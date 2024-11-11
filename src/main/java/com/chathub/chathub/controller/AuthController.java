@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import static com.chathub.chathub.DemoDataCreator.DEMO_PASSWORD;
+
 @RestController
 @RequestMapping("/api")
 
@@ -39,6 +41,10 @@ public class AuthController {
         if (loginData == null) {
             LOGGER.info("LoginData is NULL");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        if (!DEMO_PASSWORD.equals(loginData.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         LOGGER.info("Received LoginData: username={}, password={}", loginData.getUsername(), loginData.getPassword());

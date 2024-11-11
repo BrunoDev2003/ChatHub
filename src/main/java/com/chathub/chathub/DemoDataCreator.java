@@ -31,7 +31,7 @@ public class DemoDataCreator {
         this.createDemoData();
     }
 
-    private static final String DEMO_PASSWORD = "senha123";
+    public static final String DEMO_PASSWORD = "senha123";
     private static final List<String> DEMO_USERNAME_LIST = Arrays.asList("Joe", "Bruno", "Mariana", "Alex");
     private static final List<String> DEMO_GREETING_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
     private static final List<String> DEMO_MESSAGES_LIST = Arrays.asList("Hello", "Hi", "Yo", "Hola");
