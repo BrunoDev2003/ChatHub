@@ -114,4 +114,10 @@ public class RoomsController {
         return null;
     }
 
+    @DeleteMapping("/{roomId}/messages")
+    public ResponseEntity<?> deleteMessages(@PathVariable String roomId, @RequestBody Message message) {
+        roomsRepository.deleteMessage(roomId, message);
+        return ResponseEntity.ok("Mensagem deletada com sucesso");
+    }
+
 }

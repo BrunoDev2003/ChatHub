@@ -23,6 +23,9 @@ public class RoomsRepository {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private Gson gson;
+
     private static final String ROOMS_USER_KEY = "rooms:%d:users";
     private static final String ROOMS_NAME_KEY = "rooms:%s:name";
     private static final String ROOMS_KEY = "rooms:%s";
@@ -88,6 +91,10 @@ public class RoomsRepository {
             messages.forEach(json -> userMessages.add(new Gson().fromJson(json, ChatRoomMessage.class)));
         }
         return userMessages;
+    }
+
+    public void deleteMessage(String roomKey, Message message) {
+        redisTemplate.opsForZSet().remove(roomKey, gson.toJson(message));
     }
 
 
