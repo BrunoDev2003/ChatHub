@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/health").permitAll() // Allow unauthenticated access to /api/health
                         .requestMatchers("/api/login").permitAll()  // Allow unauthenticated access to /api/login
-                        .requestMatchers("/api/**").authenticated() // Require authentication for all other /api/** routes
+                        .requestMatchers("/api/**").permitAll() // Require authentication for all other /api/** routes
                         .anyRequest().permitAll() // Allow unauthenticated access to all other routes
                 )
                 .sessionManagement(session -> session

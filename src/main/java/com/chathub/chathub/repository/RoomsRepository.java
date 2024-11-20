@@ -81,6 +81,7 @@ public class RoomsRepository {
         Gson gson = new Gson();
         String roomKey = String.format(ROOMS_KEY, message.getRoomId());
         redisTemplate.opsForZSet().add(roomKey, gson.toJson(message), message.getDate());
+        System.out.println("Stored message under key: " + roomKey);
     }
 
     public List getMessagesByUserId(int userId) {
@@ -94,8 +95,21 @@ public class RoomsRepository {
     }
 
     public void deleteMessage(String roomKey, Message message) {
-        redisTemplate.opsForZSet().remove(roomKey, gson.toJson(message));
+        String serializedMessage = gson.toJson(message);
+        System.out.println("Tentando remover mensagem pela chave roomKey:" + roomKey);
+        Boolean keyExists = redisTemplate.hasKey(roomKey);
+        System.out.println("Chave key: " + keyExists);
+
+        Set<String> storedMessages = redisTemplate.opsForZSet().range(roomKey, 0, -1);
+        if (storedMessages != null) {
+            for (String storedMessage : storedMessages) {
+                System.out.println("Stored message: " + storedMessage); // Log the stored messages } } Long removedCount = redisTemplate.opsForZSet().remove(roomKey, serializedMessage); System.out.println("Removed count: " + removedCount); // Log the number of removed elements }
+            }
+        } else {
+            System.out.println("Mensagens não encontradas pela chave roomKey: " + roomKey);
+        }
+
+        Long removedCount = redisTemplate.opsForZSet().remove(roomKey, serializedMessage);
+        System.out.println("Removed count: " + removedCount); // Log the number of removed elements
     }
-
-
 }

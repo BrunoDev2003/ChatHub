@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.springframework.data.redis.serializer.SerializationUtils.deserialize;
 
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("/api/rooms")
 public class RoomsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomsController.class);
