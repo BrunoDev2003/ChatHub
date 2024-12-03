@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +30,6 @@ public class UsersRepository {
     private RedisTemplate<String, User> redisUserTemplate;
 
     public User getUserById(int id) {
-
-        /*String username = redisTemplate.opsForHash().get(String.format(USERNAME_KEY, id), USERNAME_HASH_KEY);
-        boolean isOnline = Boolean.parseBoolean(redisTemplate.opsForHash().get(String.format(USERNAME_KEY, id), IS_ONLINE_HASH_KEY));
-        return new User(id, username, isOnline);*/
-
         String usernameKey = String.format(USERNAME_KEY, id);
         String username = (String) redisTemplate.opsForHash().get(usernameKey, USERNAME_HASH_KEY);
         if (username == null) {

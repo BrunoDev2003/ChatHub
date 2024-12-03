@@ -6,7 +6,6 @@ import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
 import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;

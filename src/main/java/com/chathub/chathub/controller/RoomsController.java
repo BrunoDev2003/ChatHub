@@ -1,6 +1,5 @@
 package com.chathub.chathub.controller;
 
-import com.chathub.chathub.model.ChatRoomMessage;
 import com.chathub.chathub.model.Message;
 import com.chathub.chathub.model.Room;
 import com.chathub.chathub.model.User;
@@ -19,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import static org.springframework.data.redis.serializer.SerializationUtils.deserialize;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -93,15 +90,6 @@ public class RoomsController {
     public ResponseEntity<List<Message>> getMessages(@PathVariable String roomId) {
         List<Message> messages = roomsRepository.getMessagesByRoomId(roomId);
         return ResponseEntity.ok(messages);
-//        boolean roomExists = roomsRepository.roomExists(roomId);
-//        List<Message> messages = new ArrayList<>();
-//        if (roomExists) {
-//            Set<String> values = roomsRepository.getMessages(roomId, offset, size);
-//            for (String value : values) {
-//                messages.add(deserialize(value));
-//            }
-//        }
-//        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
     private Message deserialize(String value) {

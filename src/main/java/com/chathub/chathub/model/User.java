@@ -5,9 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Getter;
 import lombok.Setter;
 
-//import java.io.Serializable;
-
-
 @JsonTypeName("com.chathub.chathub.model.User")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,

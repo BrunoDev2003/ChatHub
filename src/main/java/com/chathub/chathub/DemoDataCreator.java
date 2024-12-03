@@ -118,8 +118,6 @@ public class DemoDataCreator {
         // Salvar User Object corretamente em formato de uma String JSON usando a propriedade @class;
         Gson gson = new Gson();
         User user = new User(nextId, username, false);
-//        String userJson = gson.toJson(new User(nextId, username, false));
-//        String userJson = gson.toJson(user);
         redisUserTemplate.opsForValue().set(userKey, user);
         LOGGER.info("Stored user object as JSON in redisTemplate with key: {}", userKey);
 

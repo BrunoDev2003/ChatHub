@@ -3,13 +3,11 @@ package com.chathub.chathub.controller;
 import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
-import com.chathub.chathub.service.MessageSubscriber;
 import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -19,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
-
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -91,7 +88,7 @@ public class UsersController {
     }
 
     /**
-     * O request que o cliente faz para verificar se o usuário existe no cache.
+     * O request que o cliente faz para verificar se o usuário existe no cache pela sua Id.
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, User>> get(@RequestParam(value = "ids") String idsString) {
@@ -118,7 +115,7 @@ public class UsersController {
     }
 
     /**
-     * O request que o cliente faz para verificar se o usuário existe no cache.
+     * O request que o cliente faz para verificar se o usuário existe em uma sessão do Redis.
      */
 
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -166,6 +163,8 @@ public class UsersController {
             return new ResponseEntity<>("Erro ao atualizar o status do usuário.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    //Endpoint para obter atualizações de status como uma nova mensagem do usuário, atualização que busca a fila de mensagens a cada 5 segundos no máximo.
 
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/status-updates")

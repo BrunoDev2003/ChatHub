@@ -14,8 +14,6 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.slf4j.Logger;
 import org.springframework.web.bind.annotation.*;
@@ -88,10 +86,6 @@ public class ChatRoomController {
         emitter.onTimeout(onDetach);
 
         return emitter;
-
-    /*public ChatRoomMessage sendMessage(ChatRoomMessage message) {
-        return new ChatRoomMessage(message.getFrom(), message.getDate(), message.getMessage(), message.getRoomId());
-    }*/
     }
 
     /**
@@ -180,6 +174,5 @@ public class ChatRoomController {
         List<Message> userMessages = roomsRepository.getMessagesByUserId(userId);
         return ResponseEntity.ok(userMessages);
     }
-
 
 }

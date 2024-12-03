@@ -66,7 +66,7 @@ public class RoomsRepository {
 
 
     public List<ChatRoomMessage> getAllMessages() {
-        // Assuming you store messages with a known key pattern
+        // Pegamos as mensagens de um conjunto ordenado padrão;
         Set<String> messages = redisTemplate.opsForZSet().reverseRange("room:messages", 0, -1);
         return messages.stream().map(json -> new Gson().fromJson(json, ChatRoomMessage.class)).collect(Collectors.toList());
     }
@@ -103,13 +103,13 @@ public class RoomsRepository {
         Set<String> storedMessages = redisTemplate.opsForZSet().range(roomKey, 0, -1);
         if (storedMessages != null) {
             for (String storedMessage : storedMessages) {
-                System.out.println("Stored message: " + storedMessage); // Log the stored messages } } Long removedCount = redisTemplate.opsForZSet().remove(roomKey, serializedMessage); System.out.println("Removed count: " + removedCount); // Log the number of removed elements }
+                System.out.println("Stored message: " + storedMessage); // Faz o log de mensagens armazenadas;
             }
         } else {
             System.out.println("Mensagens não encontradas pela chave roomKey: " + roomKey);
         }
 
         Long removedCount = redisTemplate.opsForZSet().remove(roomKey, serializedMessage);
-        System.out.println("Removed count: " + removedCount); // Log the number of removed elements
+        System.out.println("Removed count: " + removedCount); // Faz o log de mensagens removidas;
     }
 }
