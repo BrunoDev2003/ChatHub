@@ -58,15 +58,19 @@ public class RedisAppConfig {
         //ler variaveis de ambiente
         String endpointUrl = System.getenv("REDIS_ENDPOINT_URL");
         if (endpointUrl == null) {
-            endpointUrl = "127.0.0.1:6379";
+            endpointUrl = "redis-16592.c61.us-east-1-3.ec2.redns.redis-cloud.com:16592";
+        }
+        String username = System.getenv("REDIS_USERNAME");
+        if (username == null) {
+            username = "default";
         }
 
         String password = System.getenv("REDIS_PASSWORD");
 
-        String[] urlParts = endpointUrl.split(":");
+        String[] urlParts = endpointUrl.trim().split(":");
 
         String host = urlParts[0];
-        String port = "0";
+        String port = urlParts[1];
 
         if (urlParts.length > 1) {
             port = urlParts[1];
@@ -74,11 +78,13 @@ public class RedisAppConfig {
 
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, Integer.parseInt(port));
 
-        System.out.printf("Conectando ao %s:%s com a senha: %s%n", host, port, password);
+        redisStandaloneConfiguration.setUsername(username);
+        redisStandaloneConfiguration.setPassword(password);
+        System.out.printf("Password length: %d%n", password.length());
+        System.out.printf("Password: '%s'%n", password);
 
-        if (password != null) {
-            redisStandaloneConfiguration.setPassword(password);
-        }
+        System.out.printf("Conectando ao %s:%s com username %s e com a senha: %s%n", host, port, username, password);
+
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
