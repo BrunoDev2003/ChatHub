@@ -19,6 +19,8 @@ public class ChathubApplication {
         app.setDefaultProperties(Collections.singletonMap("server.port", port));
         app.run(args);
 
+        System.out.println("Application started on the port: " + port);
+
     }
 
 }
