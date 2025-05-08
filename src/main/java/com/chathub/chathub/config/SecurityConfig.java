@@ -20,7 +20,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://chat-hub-frontend-hx78.vercel.app", "https://chathub-frontend.vercel.app", "https://chathub-frontend-git-main-chathub.vercel.app", "https://chathub-frontend.vercel.app/"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowCredentials(true);
                     corsConfiguration.setAllowedHeaders(List.of("*"));
