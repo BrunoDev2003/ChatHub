@@ -2,6 +2,8 @@ package com.chathub.chathub.config;
 
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.service.MessageSubscriber;
+import io.lettuce.core.SslOptions;
+import org.apache.logging.log4j.core.net.ssl.TrustStoreConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,6 +24,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
+import javax.net.ssl.TrustManagerFactory;
 import java.net.URI;
 
 @Configuration
@@ -81,6 +84,7 @@ public class RedisAppConfig {
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
+                .disablePeerVerification()
                 .build();
 
         System.out.println("Connecting to Redis:");
