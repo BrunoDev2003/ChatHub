@@ -61,7 +61,7 @@ public class RedisAppConfig {
         String redisUrl = System.getenv("REDISCLOUD_URL");
 
         if (redisUrl == null || redisUrl.isEmpty()) {
-            throw new RuntimeException("REDIS_URL environment variable is not set");
+            throw new RuntimeException("REDISCLOUD_URL environment variable is not set");
         }
         //ler variaveis de ambiente
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
@@ -72,11 +72,9 @@ public class RedisAppConfig {
         redisStandaloneConfiguration.setUsername(redisUri.getUserInfo().split(":")[0]);
         redisStandaloneConfiguration.setPassword(redisUri.getUserInfo().split(":")[1]);
 
-        redisStandaloneConfiguration.setUsername(System.getenv("REDIS_USERNAME"));
-        redisStandaloneConfiguration.setPassword(System.getenv("REDIS_PASSWORD"));
-
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
+                .disablePeerVerification()
                 .build();
 
         return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
