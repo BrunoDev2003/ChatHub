@@ -72,15 +72,22 @@ public class RedisAppConfig {
         redisStandaloneConfiguration.setPort(redisUri.getPort());
 
         String[] userInfo = redisUri.getUserInfo().split(":");
-        if (userInfo.length == 2) {
+        if (userInfo.length == 1) {
+            redisStandaloneConfiguration.setPassword(RedisPassword.of(userInfo[0]));
+        } else if (userInfo.length == 2) {
             redisStandaloneConfiguration.setUsername(userInfo[0]);
             redisStandaloneConfiguration.setPassword(RedisPassword.of(userInfo[1]));
         }
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
-                .disablePeerVerification()
                 .build();
+
+        System.out.println("Connecting to Redis:");
+        System.out.println("Host: " + redisStandaloneConfiguration.getHostName());
+        System.out.println("Port: " + redisStandaloneConfiguration.getPort());
+        System.out.println("Username: " + redisStandaloneConfiguration.getUsername());
+        System.out.println("Password: " + redisStandaloneConfiguration.getPassword().toString());
 
         return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
     }
