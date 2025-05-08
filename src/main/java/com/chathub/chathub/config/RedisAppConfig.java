@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,6 +20,8 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+
+import java.net.URI;
 
 @Configuration
 @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 1800) // 30 minutos
@@ -55,15 +58,28 @@ public class RedisAppConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        String redisUrl = System.getenv("REDIS_URL");
+
+        if (redisUrl == null || redisUrl.isEmpty()) {
+            throw new RuntimeException("REDIS_URL environment variable is not set");
+        }
         //ler variaveis de ambiente
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(
-                System.getenv("REDIS_HOST"),
-                Integer.parseInt(System.getenv("REDIS_PORT"))
-        );
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+
+        URI redisUri = URI.create(redisUrl);
+        redisStandaloneConfiguration.setHostName(redisUri.getHost());
+        redisStandaloneConfiguration.setPort(redisUri.getPort());
+        redisStandaloneConfiguration.setUsername(redisUri.getUserInfo().split(":")[0]);
+        redisStandaloneConfiguration.setPassword(redisUri.getUserInfo().split(":")[1]);
+
         redisStandaloneConfiguration.setUsername(System.getenv("REDIS_USERNAME"));
         redisStandaloneConfiguration.setPassword(System.getenv("REDIS_PASSWORD"));
 
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .useSsl()
+                .build();
+
+        return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
     }
 
     @Bean
