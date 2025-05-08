@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class SecurityConfig {
                     corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://chat-hub-frontend-hx78.vercel.app", "https://chathub-frontend.vercel.app", "https://chathub-frontend-git-main-chathub.vercel.app", "https://chathub-frontend.vercel.app/"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowCredentials(true);
-                    corsConfiguration.setAllowedHeaders(List.of("*"));
+                    corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
                     return corsConfiguration;
                 }))
                 .csrf(csrf -> csrf.disable())
@@ -51,4 +53,23 @@ public class SecurityConfig {
 //                );
         return http.build();
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://chat-hub-frontend-hx78.vercel.app",
+                "https://chathub-frontend.vercel.app",
+                "https://chathub-frontend-git-main-chathub.vercel.app"
+        ));
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowCredentials(true);
+        corsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return new CorsFilter(source);
+    }
+
 }
