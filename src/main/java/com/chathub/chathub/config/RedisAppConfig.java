@@ -58,7 +58,7 @@ public class RedisAppConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        String redisUrl = System.getenv("REDIS_URL");
+        String redisUrl = System.getenv("REDISCLOUD_URL");
 
         if (redisUrl == null || redisUrl.isEmpty()) {
             throw new RuntimeException("REDIS_URL environment variable is not set");
