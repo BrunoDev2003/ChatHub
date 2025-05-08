@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -64,13 +65,17 @@ public class RedisAppConfig {
             throw new RuntimeException("REDISCLOUD_URL environment variable is not set");
         }
         //ler variaveis de ambiente
+        URI redisUri = URI.create(redisUrl);
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
 
-        URI redisUri = URI.create(redisUrl);
         redisStandaloneConfiguration.setHostName(redisUri.getHost());
         redisStandaloneConfiguration.setPort(redisUri.getPort());
-        redisStandaloneConfiguration.setUsername(redisUri.getUserInfo().split(":")[0]);
-        redisStandaloneConfiguration.setPassword(redisUri.getUserInfo().split(":")[1]);
+
+        String[] userInfo = redisUri.getUserInfo().split(":");
+        if (userInfo.length == 2) {
+            redisStandaloneConfiguration.setUsername(userInfo[0]);
+            redisStandaloneConfiguration.setPassword(RedisPassword.of(userInfo[1]));
+        }
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
