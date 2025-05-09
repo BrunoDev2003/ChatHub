@@ -3,6 +3,7 @@ package com.chathub.chathub.config;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.service.MessageSubscriber;
 import io.lettuce.core.SslOptions;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.apache.logging.log4j.core.net.ssl.TrustStoreConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,10 +70,11 @@ public class RedisAppConfig {
         }
         //ler variaveis de ambiente
         URI redisUri = URI.create(redisUrl);
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(
+                redisUri.getHost(),
+                redisUri.getPort()
+        );
 
-        redisStandaloneConfiguration.setHostName(redisUri.getHost());
-        redisStandaloneConfiguration.setPort(redisUri.getPort());
 
         String[] userInfo = redisUri.getUserInfo().split(":");
         if (userInfo.length == 1) {
@@ -83,17 +85,18 @@ public class RedisAppConfig {
         }
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .useSsl()
-                .disablePeerVerification()
+                .useSsl().
+                disablePeerVerification()
                 .build();
 
-        System.out.println("Connecting to Redis:");
-        System.out.println("Host: " + redisStandaloneConfiguration.getHostName());
-        System.out.println("Port: " + redisStandaloneConfiguration.getPort());
-        System.out.println("Username: " + redisStandaloneConfiguration.getUsername());
-        System.out.println("Password: " + redisStandaloneConfiguration.getPassword().toString());
+        System.out.println("🔴 Redis Connection Attempt:");
+        System.out.println("➡ Host: " + redisStandaloneConfiguration.getHostName());
+        System.out.println("➡ Port: " + redisStandaloneConfiguration.getPort());
+        System.out.println("➡ Username: " + redisStandaloneConfiguration.getUsername());
+        System.out.println("➡ Password: " + redisStandaloneConfiguration.getPassword().toString());
 
         return new LettuceConnectionFactory(redisStandaloneConfiguration, clientConfig);
+
     }
 
     @Bean
