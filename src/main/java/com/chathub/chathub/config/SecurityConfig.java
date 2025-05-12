@@ -1,8 +1,10 @@
 package com.chathub.chathub.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -69,6 +71,10 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
+
+        FilterRegistrationBean<CorsFilter> filterBean = new FilterRegistrationBean<>(new CorsFilter(source)); // Cria uma nova instância do FilterRegistration usando CorsFilter como o type dos dados
+        filterBean.setOrder(Ordered.HIGHEST_PRECEDENCE); //Garante que o CORS rode antes de qualquer outro filtro do Spring security
+
         return new CorsFilter(source);
     }
 
