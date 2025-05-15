@@ -86,7 +86,7 @@ public class RedisAppConfig {
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl().
-                disablePeerVerification()
+              //  disablePeerVerification()
                 .build();
 
         System.out.println("🔴 Redis Connection Attempt:");
