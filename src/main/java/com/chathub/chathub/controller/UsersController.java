@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
+
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -38,7 +40,8 @@ public class UsersController {
     @Autowired
     private RedisTemplate<String, User> redisUserTemplate;
 
-    private Jedis jedis = new Jedis("localhost", 6379);
+    URI redisUri = URI.create("rediss://default:wIVkh3YXQbSKBuaPlUQudER6IhvtnQUU@redis-16592.c61.us-east-1-3.ec2.redns.redis-cloud.com:16592");
+    private Jedis jedis = new Jedis(redisUri);
     private BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
 
     public UsersController() {
