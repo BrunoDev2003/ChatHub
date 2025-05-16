@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
 public class LinksController {
-    @GetMapping(value = "/links", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/api/links", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Link> getMe() {
         return new ResponseEntity<Link>(new Link(), HttpStatus.OK);
     }
