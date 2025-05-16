@@ -50,7 +50,7 @@ public class UsersController {
 
     @PostConstruct
     public void initJedisSubscriber() {
-        new Thread(() -> this.jedisSub.subscribe(new JedisPubSub() {
+        new Thread(() -> jedisSub.subscribe(new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
                 LOGGER.info("Mensagem recebida no global subscriber: " + message + "No canal: " + channel);
