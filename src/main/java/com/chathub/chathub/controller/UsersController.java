@@ -5,6 +5,7 @@ import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
 import com.chathub.chathub.service.UserService;
 import com.google.gson.Gson;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,10 @@ public class UsersController {
     @Autowired
     public UsersController(Jedis jedis) {
         this.jedis = jedis;
+    }
 
+    @PostConstruct
+    public void initJedisSubscriber() {
         new Thread(() -> this.jedis.subscribe(new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
