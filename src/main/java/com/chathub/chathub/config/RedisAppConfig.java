@@ -85,9 +85,9 @@ public class RedisAppConfig {
         }
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .useSsl().
+               // .useSsl()
               //  disablePeerVerification()
-                build();
+                .build();
 
         System.out.println("🔴 Redis Connection Attempt:");
         System.out.println("➡ Host: " + redisStandaloneConfiguration.getHostName());
