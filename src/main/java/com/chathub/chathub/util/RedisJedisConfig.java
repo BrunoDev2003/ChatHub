@@ -11,12 +11,12 @@ import redis.clients.jedis.JedisClientConfig;
 import java.net.URI;
 
 @Configuration
-public class RedisConnectionFactory {
+public class RedisJedisConfig {
 
     @Value("${redis.url}")
     private String REDIS_URI;
 
-    @Bean
+    @Bean(name = "customJedisClient")
     public Jedis getJedisClient() {
         URI redisUri = URI.create(REDIS_URI);
         String[] userInfo = redisUri.getUserInfo().split(":");

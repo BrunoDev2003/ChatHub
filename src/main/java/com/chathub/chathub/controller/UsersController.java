@@ -4,7 +4,6 @@ import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
 import com.chathub.chathub.service.UserService;
-import com.chathub.chathub.util.RedisConnectionFactory;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.*;
 
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;

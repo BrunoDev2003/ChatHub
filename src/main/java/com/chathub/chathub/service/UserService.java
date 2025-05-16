@@ -1,7 +1,7 @@
 package com.chathub.chathub.service;
 
-import com.chathub.chathub.util.RedisConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
@@ -11,7 +11,7 @@ public class UserService {
 
     private final Jedis jedis;
     @Autowired
-    public UserService(Jedis jedis) {
+    public UserService(@Qualifier("customJedisClient") Jedis jedis) {
         this.jedis = jedis;
     }
     public void updateUserStatus(String userId, boolean isOnline) {
