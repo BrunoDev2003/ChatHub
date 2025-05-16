@@ -26,7 +26,7 @@ public class RedisJedisConfig {
         HostAndPort hostAndPort = new HostAndPort(redisUri.getHost(), redisUri.getPort());
 
         JedisClientConfig clientConfig = DefaultJedisClientConfig.builder()
-                .ssl(true)
+                .ssl(false)
                 .user(username)
                 .password(password)
                 .build();
