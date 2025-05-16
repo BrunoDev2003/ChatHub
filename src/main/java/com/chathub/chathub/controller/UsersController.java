@@ -4,6 +4,7 @@ import com.chathub.chathub.config.SessionAttrs;
 import com.chathub.chathub.model.User;
 import com.chathub.chathub.repository.UsersRepository;
 import com.chathub.chathub.service.UserService;
+import com.chathub.chathub.util.RedisConnectionFactory;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -15,8 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.*;
 
 import java.net.URI;
 import java.util.*;
@@ -39,20 +39,21 @@ public class UsersController {
 
     @Autowired
     private RedisTemplate<String, User> redisUserTemplate;
-
-    URI redisUri = URI.create("rediss://default:wIVkh3YXQbSKBuaPlUQudER6IhvtnQUU@redis-16592.c61.us-east-1-3.ec2.redns.redis-cloud.com:16592");
-    private Jedis jedis = new Jedis(redisUri);
     private BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
 
-    public UsersController() {
-        new Thread(() -> jedis.subscribe(new JedisPubSub() {
+    private final Jedis jedis;
+
+    @Autowired
+    public UsersController(Jedis jedis) {
+        this.jedis = jedis;
+
+        new Thread(() -> this.jedis.subscribe(new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
                 LOGGER.info("Mensagem recebida no global subscriber: " + message + "No canal: " + channel);
                 if ("user-status".equals(channel)) {
                     messageQueue.offer(message);
                 }
-                /*super.onMessage(channel, message);*/
             }
 
             @Override
