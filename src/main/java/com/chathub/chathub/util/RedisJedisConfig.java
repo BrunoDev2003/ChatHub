@@ -26,7 +26,6 @@ public class RedisJedisConfig {
         return getJedisClient(REDIS_URI);
     }
 
-    @Bean(name = "customJedisClient")
     public Jedis getJedisClient(String REDIS_URI) {
         URI redisUri = URI.create(REDIS_URI);
         String[] userInfo = redisUri.getUserInfo().split(":");
