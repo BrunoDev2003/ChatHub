@@ -16,8 +16,18 @@ public class RedisJedisConfig {
     @Value("${redis.url}")
     private String REDIS_URI;
 
+    @Bean(name = "jedisSub")
+    public Jedis jedisSub() {
+        return getJedisClient(REDIS_URI);
+    }
+
+    @Bean(name = "jedisPub")
+    public Jedis jedisPub() {
+        return getJedisClient(REDIS_URI);
+    }
+
     @Bean(name = "customJedisClient")
-    public Jedis getJedisClient() {
+    public Jedis getJedisClient(String REDIS_URI) {
         URI redisUri = URI.create(REDIS_URI);
         String[] userInfo = redisUri.getUserInfo().split(":");
         String username = userInfo[0];

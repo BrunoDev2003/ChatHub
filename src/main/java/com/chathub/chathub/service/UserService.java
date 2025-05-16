@@ -7,15 +7,15 @@ import redis.clients.jedis.Jedis;
 
 @Service
 public class UserService {
-    //private Jedis jedis = RedisConnectionFactory.getJedisClient();
 
-    private final Jedis jedis;
+    private final Jedis jedisPub;
+
     @Autowired
-    public UserService(@Qualifier("customJedisClient") Jedis jedis) {
-        this.jedis = jedis;
+    public UserService(@Qualifier("jedisPub") Jedis jedisPub) {
+        this.jedisPub = jedisPub;
     }
     public void updateUserStatus(String userId, boolean isOnline) {
         String status = isOnline ? "online" : "offline";
-        jedis.publish("user-status", userId + ":" + status);
+        jedisPub.publish("user-status", userId + ":" + status);
     }
 }

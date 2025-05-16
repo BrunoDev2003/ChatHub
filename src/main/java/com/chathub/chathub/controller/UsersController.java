@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,16 +41,16 @@ public class UsersController {
     private RedisTemplate<String, User> redisUserTemplate;
     private BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
 
-    private final Jedis jedis;
+    private final Jedis jedisSub;
 
     @Autowired
-    public UsersController(Jedis jedis) {
-        this.jedis = jedis;
+    public UsersController(@Qualifier("jedisSub") Jedis jedisSub) {
+        this.jedisSub = jedisSub;
     }
 
     @PostConstruct
     public void initJedisSubscriber() {
-        new Thread(() -> this.jedis.subscribe(new JedisPubSub() {
+        new Thread(() -> this.jedisSub.subscribe(new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
                 LOGGER.info("Mensagem recebida no global subscriber: " + message + "No canal: " + channel);
